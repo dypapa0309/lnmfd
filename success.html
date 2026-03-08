@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaf & Moss | 결제 완료</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <section class="section success-screen">
+    <div class="wrap narrow center">
+      <div class="section-kicker">PAYMENT COMPLETE</div>
+      <h1>펀딩 참여가 완료되었습니다</h1>
+      <p class="section-copy center-copy">결제가 정상적으로 완료되었습니다. 배송 일정은 추후 안내드립니다.</p>
+      <div class="success-box">
+        <div><span>주문번호</span><strong id="successOrderId">확인 중...</strong></div>
+        <div><span>결제금액</span><strong id="successAmount">확인 중...</strong></div>
+      </div>
+      <div id="confirmStatus" class="admin-message">결제 확인 처리 중...</div>
+      <a href="/" class="btn btn--solid">홈으로 돌아가기</a>
+    </div>
+  </section>
+  <script>
+    (async function(){
+      const params = new URLSearchParams(location.search);
+      const orderId = params.get('orderId') || '';
+      const amount = params.get('amount') || '';
+      const paymentKey = params.get('paymentKey') || '';
+      document.getElementById('successOrderId').textContent = orderId || '주문번호 없음';
+      document.getElementById('successAmount').textContent = amount ? Number(amount).toLocaleString('ko-KR') + '원' : '금액 없음';
+      const statusEl = document.getElementById('confirmStatus');
+
+      if(!orderId){
+        statusEl.textContent = '주문번호가 없어 결제 확인을 마치지 못했어.';
+        return;
+      }
+
+      try{
+        const res = await fetch('/.netlify/functions/confirm-payment', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ orderId, paymentKey, amount })
+        });
+        const data = await res.json();
+        if(res.ok){
+          statusEl.textContent = '결제 확인이 완료되었어.';
+        }else{
+          statusEl.textContent = data.message || '결제 확인 처리에 실패했어.';
+        }
+      }catch(e){
+        statusEl.textContent = '결제 확인 처리 중 오류가 발생했어.';
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaf & Moss | Admin</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head center">
+        <span class="section-kicker">ADMIN</span>
+        <h2>주문 관리 대시보드</h2>
+      </div>
+
+      <div class="stats-grid admin-stats">
+        <article class="stat-card"><span>목표</span><strong id="adminGoal">300개</strong></article>
+        <article class="stat-card"><span>달성</span><strong id="adminFunded">0개</strong></article>
+        <article class="stat-card"><span>참여 주문</span><strong id="adminOrders">0건</strong></article>
+        <article class="stat-card"><span>얼리버드 잔여</span><strong id="adminEarlybird">100개</strong></article>
+      </div>
+
+      <div class="admin-box admin-box--stack">
+        <div class="admin-controls">
+          <input id="adminPassword" class="form-input" placeholder="관리자 비밀번호" />
+          <input id="orderSearch" class="form-input" placeholder="이름 / 전화번호 / 주문번호 검색" />
+          <select id="statusFilter" class="form-input">
+            <option value="">전체 상태</option>
+            <option value="pending">pending</option>
+            <option value="paid">paid</option>
+            <option value="failed">failed</option>
+            <option value="cancelled">cancelled</option>
+          </select>
+        </div>
+        <div class="admin-actions">
+          <button id="loadOrdersBtn" class="btn btn--solid" type="button">주문 불러오기</button>
+          <button id="downloadCsvBtn" class="btn btn--ghost" type="button">CSV 다운로드</button>
+        </div>
+        <div id="adminMessage" class="admin-message">아직 불러오지 않았습니다.</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>주문번호</th>
+              <th>이름</th>
+              <th>전화번호</th>
+              <th>리워드</th>
+              <th>수량</th>
+              <th>총액</th>
+              <th>상태</th>
+              <th>생성일</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="8">주문 데이터 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    let loadedRows = [];
+
+    async function loadAdminStats(){
+      try{
+        const res = await fetch('/.netlify/functions/get-funding-stats');
+        const data = await res.json();
+        document.getElementById('adminGoal').textContent = (data.goalQty || 300) + '개';
+        document.getElementById('adminFunded').textContent = (data.fundedQty || 0) + '개';
+        document.getElementById('adminOrders').textContent = (data.orderCount || 0) + '건';
+        document.getElementById('adminEarlybird').textContent = (data.earlybirdRemaining || 100) + '개';
+      }catch(e){}
+    }
+
+    function renderRows(rows){
+      const tbody = document.getElementById('ordersTableBody');
+      if(!rows.length){
+        tbody.innerHTML = '<tr><td colspan="8">조건에 맞는 주문이 없음</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td>${row.order_id || ''}</td>
+          <td>${row.name || ''}</td>
+          <td>${row.phone || ''}</td>
+          <td>${row.reward_name || ''}</td>
+          <td>${row.reward_qty || ''}</td>
+          <td>${row.total_amount ? Number(row.total_amount).toLocaleString('ko-KR') + '원' : ''}</td>
+          <td>${row.payment_status || ''}</td>
+          <td>${row.created_at ? String(row.created_at).slice(0,19).replace('T',' ') : ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    function applyFilters(){
+      const q = document.getElementById('orderSearch').value.trim().toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      let rows = [...loadedRows];
+
+      if(q){
+        rows = rows.filter(row =>
+          String(row.order_id || '').toLowerCase().includes(q) ||
+          String(row.name || '').toLowerCase().includes(q) ||
+          String(row.phone || '').toLowerCase().includes(q)
+        );
+      }
+      if(status){
+        rows = rows.filter(row => String(row.payment_status || '') === status);
+      }
+      renderRows(rows);
+    }
+
+    function downloadCsv(){
+      if(!loadedRows.length) return;
+      const headers = ['order_id','name','phone','reward_name','reward_qty','total_amount','payment_status','created_at'];
+      const csv = [
+        headers.join(','),
+        ...loadedRows.map(row => headers.map(h => `"${String(row[h] ?? '').replaceAll('"','""')}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'leafmoss_orders.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function loadOrders(){
+      const msg = document.getElementById('adminMessage');
+      const password = document.getElementById('adminPassword').value.trim();
+      msg.textContent = '불러오는 중...';
+      try{
+        const res = await fetch('/.netlify/functions/list-orders', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if(!res.ok){
+          msg.textContent = data.message || '불러오기 실패';
+          return;
+        }
+        loadedRows = Array.isArray(data.orders) ? data.orders : [];
+        renderRows(loadedRows);
+        msg.textContent = loadedRows.length + '건 불러왔습니다.';
+      }catch(e){
+        msg.textContent = '불러오기 실패';
+      }
+    }
+
+    document.getElementById('loadOrdersBtn').addEventListener('click', loadOrders);
+    document.getElementById('orderSearch').addEventListener('input', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('downloadCsvBtn').addEventListener('click', downloadCsv);
+
+    loadAdminStats();
+  </script>
+</body>
+</html>

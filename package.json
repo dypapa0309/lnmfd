@@ -1,0 +1,8 @@
+{
+  "name": "leafmoss-funding-v10",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.0"
+  }
+}

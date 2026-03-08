@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaf & Moss | 자사 펀딩 v10</title>
+  <meta name="description" content="Leaf & Moss 비대칭 독서링 자사 펀딩 페이지" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="https://js.tosspayments.com/v1/payment"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a href="#hero" class="brand">
+        <img src="assets/images/logo.png" alt="Leaf & Moss 로고" class="brand__logo" />
+        <span>Leaf & Moss</span>
+      </a>
+      <nav class="nav">
+        <a href="#fundingStats">현황</a>
+        <a href="#rewards">리워드</a>
+        <a href="#order">주문</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <section id="hero" class="hero">
+    <div class="hero__bg"></div>
+    <div class="wrap hero__inner">
+      <div class="eyebrow">ASYMMETRY READING RING</div>
+      <h1>정해진 길을 가지 않는 사람들을 위해</h1>
+      <p class="hero__lead">
+        대칭을 벗어난 손끝에서 시작되는 새로운 독서 방식.
+        Leaf & Moss의 비대칭 독서링은 한 손 독서를 더 편안하고 더 깊게 만듭니다.
+      </p>
+      <div class="hero__actions">
+        <a href="#rewards" class="btn btn--solid">리워드 선택하기</a>
+        <a href="#order" class="btn btn--ghost">바로 펀딩하기</a>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section id="fundingStats" class="section reveal">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="section-kicker">FUNDING STATUS</span>
+          <h2>현재 펀딩 현황</h2>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span>목표 수량</span>
+            <strong id="goalQty">300개</strong>
+          </article>
+          <article class="stat-card">
+            <span>현재 달성</span>
+            <strong id="fundedQty">0개</strong>
+          </article>
+          <article class="stat-card">
+            <span>참여 주문 수</span>
+            <strong id="orderCount">0건</strong>
+          </article>
+          <article class="stat-card">
+            <span>얼리버드 잔여</span>
+            <strong id="earlybirdRemaining">100개</strong>
+          </article>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span>진행률</span>
+            <strong id="progressPercent">0%</strong>
+          </div>
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="countdown-grid">
+          <article class="count-card">
+            <span>펀딩 종료까지</span>
+            <strong id="countdown">--</strong>
+          </article>
+          <article class="count-card">
+            <span>현재 선택 리워드</span>
+            <strong id="stickyRewardNameTop">[얼리버드] 독서링 1EA</strong>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="rewards" class="section section--dark reveal">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="section-kicker">REWARDS</span>
+          <h2>리워드를 선택해보세요</h2>
+          <p class="section-copy center-copy">카드를 클릭하면 선택됩니다. 얼리버드는 재고가 0이면 자동으로 막히고 품절 문구가 표시됩니다.</p>
+        </div>
+
+        <div class="reward-grid">
+          <article class="reward-card is-selected" tabindex="0" data-type="earlybird" data-name="[얼리버드] 독서링 1EA" data-qty="1" data-price="17900" data-shipping="3000" data-limit="100">
+            <div class="reward-badge" id="earlybirdBadge">EARLY BIRD</div>
+            <h3>[얼리버드] 독서링 1EA</h3>
+            <p class="reward-price">17,900원</p>
+            <p class="reward-stock">잔여 수량: <strong id="earlybirdStockInline">100개</strong></p>
+            <ul>
+              <li>독서링 1개</li>
+              <li>100개 한정</li>
+              <li>배송비 3,000원 별도</li>
+            </ul>
+          </article>
+
+          <article class="reward-card" tabindex="0" data-type="single" data-name="일반 독서링 1EA" data-qty="1" data-price="22000" data-shipping="3000">
+            <div class="reward-badge reward-badge--mute">STANDARD</div>
+            <h3>일반 독서링 1EA</h3>
+            <p class="reward-price">22,000원</p>
+            <ul>
+              <li>독서링 1개</li>
+              <li>일반 리워드</li>
+              <li>배송비 3,000원 별도</li>
+            </ul>
+          </article>
+
+          <article class="reward-card reward-card--featured" tabindex="0" data-type="double" data-name="독서링 2EA 세트" data-qty="2" data-price="42000" data-shipping="3000">
+            <div class="reward-badge reward-badge--solid">RECOMMENDED</div>
+            <h3>독서링 2EA 세트</h3>
+            <p class="reward-price">42,000원</p>
+            <ul>
+              <li>독서링 2개</li>
+              <li>개별 포장</li>
+              <li>배송비 3,000원 별도</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="reward-summary">
+          <div>
+            <span class="summary-label">선택한 리워드</span>
+            <strong id="selectedRewardName">[얼리버드] 독서링 1EA</strong>
+          </div>
+          <div>
+            <span class="summary-label">결제 예상 금액</span>
+            <strong id="selectedRewardTotal">20,900원</strong>
+          </div>
+          <button class="btn btn--solid btn--wide" id="jumpToOrderBtn" type="button">이 리워드로 주문하기</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="order" class="section reveal">
+      <div class="wrap narrow">
+        <div class="section-head center">
+          <span class="section-kicker">ORDER</span>
+          <h2>주문 정보를 입력해 주세요</h2>
+        </div>
+
+        <form id="orderForm" class="order-form">
+          <div id="orderStatusBox" class="status-box" hidden>
+            선택한 리워드로 주문을 진행 중이야.
+          </div>
+
+          <div class="form-group">
+            <label for="name">이름</label>
+            <input id="name" class="form-input" placeholder="이름" />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">전화번호</label>
+            <input id="phone" class="form-input" placeholder="01012345678" />
+          </div>
+
+          <div class="address-row">
+            <div class="form-group form-group--grow">
+              <label for="zipcode">우편번호</label>
+              <input id="zipcode" class="form-input" placeholder="우편번호" />
+            </div>
+            <button type="button" class="btn btn--ghost btn--address" id="addressSearchBtn">주소 검색 준비</button>
+          </div>
+
+          <div class="form-group">
+            <label for="address">주소</label>
+            <input id="address" class="form-input" placeholder="주소" />
+          </div>
+
+          <div class="form-group">
+            <label for="addressDetail">상세주소</label>
+            <input id="addressDetail" class="form-input" placeholder="상세주소" />
+          </div>
+
+          <div class="form-group">
+            <label for="memo">배송 메모</label>
+            <textarea id="memo" class="form-textarea" placeholder="부재 시 문 앞에 놓아주세요"></textarea>
+          </div>
+
+          <label class="check-row">
+            <input type="checkbox" id="agree" />
+            <span>개인정보 수집 및 결제 진행에 동의합니다.</span>
+          </label>
+
+          <div id="formError" class="form-error" aria-live="polite"></div>
+
+          <div class="pay-summary">
+            <div>
+              <span class="summary-label">선택 리워드</span>
+              <strong id="payRewardName">[얼리버드] 독서링 1EA</strong>
+            </div>
+            <div>
+              <span class="summary-label">결제 금액</span>
+              <strong id="payTotalAmount">20,900원</strong>
+            </div>
+          </div>
+
+          <div class="pay-btn-wrap">
+            <button id="payBtn" class="btn btn--solid btn--wide" type="button">토스페이로 결제하기</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="faq" class="section section--dark reveal">
+      <div class="wrap narrow">
+        <div class="section-head center">
+          <span class="section-kicker">FAQ</span>
+          <h2>자주 묻는 질문</h2>
+        </div>
+        <div class="faq-list">
+          <details open>
+            <summary>이 제품은 어떤 독자에게 잘 맞나요?</summary>
+            <p>한 손 독서를 자주 하거나, 작은 불편 때문에 독서 흐름이 자주 끊기는 분들께 특히 잘 맞습니다.</p>
+          </details>
+          <details>
+            <summary>얼리버드 수량은 자동으로 관리되나요?</summary>
+            <p>네. 결제 완료 주문 기준으로 남은 수량이 표시되며, 0개가 되면 선택이 막히도록 구성했습니다.</p>
+          </details>
+          <details>
+            <summary>펀딩 완료 후 주문 정보는 어디서 확인하나요?</summary>
+            <p>결제 완료 후 완료 페이지에서 주문번호를 확인할 수 있고, 관리자 페이지에서도 주문 현황을 볼 수 있습니다.</p>
+          </details>
+          <details>
+            <summary>주소 입력은 더 쉽게 못하나요?</summary>
+            <p>현재는 기본 입력 방식이지만, 주소 검색 API를 붙이기 좋게 버튼과 구조를 미리 정리해 두었습니다.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="purchaseToast" class="purchase-toast" hidden>
+    <span id="purchaseToastText">서울에서 김OO님이 독서링을 선택했습니다</span>
+  </div>
+
+  <div class="sticky-cta">
+    <div class="sticky-cta__text">
+      <span>선택 중인 리워드</span>
+      <strong id="stickyRewardNameBottom">[얼리버드] 독서링 1EA</strong>
+    </div>
+    <button type="button" class="btn btn--solid btn--sm" id="stickyOrderBtn">지금 선택하기</button>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/funding.js"></script>
+  <script src="assets/js/toss.js"></script>
+</body>
+</html>
