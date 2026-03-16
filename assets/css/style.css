@@ -72,7 +72,7 @@ button{font:inherit}
 .section h2{font-size:clamp(28px, 4vw, 50px); line-height:1.14; letter-spacing:-.03em}
 .section-copy{color:var(--muted); font-size:18px; max-width:860px}
 .center-copy{margin-left:auto; margin-right:auto}
-.stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
+.stats-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:18px}
 .stat-card,.count-card,.card-lite{
   background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
   padding:26px; box-shadow:var(--shadow);
@@ -309,6 +309,7 @@ button{font:inherit}
   border-radius:12px;
   box-shadow:0 16px 40px rgba(0,0,0,.18);
 }
+<<<<<<< HEAD
 
 .image-modal__body{
   position:relative;
@@ -337,6 +338,8 @@ button{font:inherit}
 .image-modal__img.is-ready{
   opacity:1;
 }
+=======
+>>>>>>> a36f479 (dd)
 @media (max-width:640px){
   .detail-preview-overlay{left:12px; right:12px; bottom:12px}
   .image-modal__dialog{width:min(100vw - 12px, 94vw); height:94vh; margin:3vh auto}

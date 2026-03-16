@@ -18,6 +18,7 @@
         <article class="stat-card"><span>목표</span><strong id="adminGoal">300개</strong></article>
         <article class="stat-card"><span>달성</span><strong id="adminFunded">0개</strong></article>
         <article class="stat-card"><span>참여 주문</span><strong id="adminOrders">0건</strong></article>
+        <article class="stat-card"><span>현재 펀딩 금액</span><strong id="adminFundingAmount">0원</strong></article>
         <article class="stat-card"><span>얼리버드 잔여</span><strong id="adminEarlybird">100개</strong></article>
       </div>
 
@@ -72,6 +73,7 @@
         document.getElementById('adminGoal').textContent = (data.goalQty || 300) + '개';
         document.getElementById('adminFunded').textContent = (data.fundedQty || 0) + '개';
         document.getElementById('adminOrders').textContent = (data.orderCount || 0) + '건';
+        document.getElementById('adminFundingAmount').textContent = Number(data.fundingAmount || 0).toLocaleString('ko-KR') + '원';
         document.getElementById('adminEarlybird').textContent = (data.earlybirdRemaining || 100) + '개';
       }catch(e){}
     }

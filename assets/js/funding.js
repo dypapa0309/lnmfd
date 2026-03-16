@@ -2,6 +2,7 @@
   const goalEl = document.getElementById('goalQty');
   const fundedEl = document.getElementById('fundedQty');
   const orderCountEl = document.getElementById('orderCount');
+  const fundingAmountEl = document.getElementById('fundingAmount');
   const earlybirdEl = document.getElementById('earlybirdRemaining');
   const progressPercentEl = document.getElementById('progressPercent');
   const progressFill = document.getElementById('progressFill');
@@ -14,12 +15,14 @@
       const goalQty = Number(data.goalQty || 300);
       const fundedQty = Number(data.fundedQty || 0);
       const orderCount = Number(data.orderCount || 0);
+      const fundingAmount = Number(data.fundingAmount || 0);
       const earlybirdRemaining = Number(data.earlybirdRemaining ?? 100);
       const percent = Math.min(100, Math.round((fundedQty / goalQty) * 100));
 
       goalEl.textContent = goalQty + '개';
       fundedEl.textContent = fundedQty + '개';
       orderCountEl.textContent = orderCount + '건';
+      if(fundingAmountEl) fundingAmountEl.textContent = Number(fundingAmount).toLocaleString('ko-KR') + '원';
       earlybirdEl.textContent = earlybirdRemaining + '개';
       progressPercentEl.textContent = percent + '%';
       progressFill.style.width = percent + '%';

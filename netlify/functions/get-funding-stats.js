@@ -13,16 +13,18 @@ exports.handler = async () => {
 
       const { data: paidOrders, error } = await supabase
         .from('orders')
-        .select('reward_qty,reward_type')
+        .select('reward_qty,reward_type,total_amount')
         .eq('payment_status','paid');
 
       if(error){
         return { statusCode:500, body: JSON.stringify({ message:error.message }) };
       }
 
-      const fundedQty = (paidOrders || []).reduce((sum, row) => sum + Number(row.reward_qty || 0), 0);
-      const orderCount = (paidOrders || []).length;
-      const earlybirdPaid = (paidOrders || [])
+      const rows = paidOrders || [];
+      const fundedQty = rows.reduce((sum, row) => sum + Number(row.reward_qty || 0), 0);
+      const orderCount = rows.length;
+      const fundingAmount = rows.reduce((sum, row) => sum + Number(row.total_amount || 0), 0);
+      const earlybirdPaid = rows
         .filter(row => row.reward_type === 'earlybird')
         .reduce((sum, row) => sum + Number(row.reward_qty || 0), 0);
 
@@ -32,6 +34,7 @@ exports.handler = async () => {
           goalQty,
           fundedQty,
           orderCount,
+          fundingAmount,
           earlybirdRemaining: Math.max(0, earlybirdLimit - earlybirdPaid)
         })
       };
@@ -43,6 +46,7 @@ exports.handler = async () => {
         goalQty,
         fundedQty: 0,
         orderCount: 0,
+        fundingAmount: 0,
         earlybirdRemaining: earlybirdLimit
       })
     };
