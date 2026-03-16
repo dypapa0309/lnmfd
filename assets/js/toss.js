@@ -29,7 +29,7 @@
 
       payBtn.textContent = '결제창 여는 중...';
 
-      const tossClientKey = window.TOSS_CLIENT_KEY || 'YOUR_TOSS_CLIENT_KEY';
+      const tossClientKey = window.TOSS_CLIENT_KEY || 'test_ck_6BYq7GWPVvg2jJAxwvN5rNE5vbo1';
       const tossPayments = TossPayments(tossClientKey);
 
       await tossPayments.requestPayment('CARD', {
