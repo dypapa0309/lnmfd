@@ -83,10 +83,54 @@
     document.getElementById('order')?.scrollIntoView({behavior:'smooth'});
   });
 
-  addressSearchBtn?.addEventListener('click', () => {
+    function openPostcodeSearch(){
     const box = document.getElementById('formError');
-    box.textContent = '주소 검색 API를 붙일 준비가 된 버튼이야. 지금은 직접 입력 방식으로 사용해줘.';
-  });
+    box.textContent = '';
+    if(!window.daum || !window.daum.Postcode){
+      box.textContent = '주소 검색 스크립트를 불러오지 못했어. 잠시 후 다시 시도해줘.';
+      return;
+    }
+
+    new daum.Postcode({
+      oncomplete: function(data){
+        const roadAddress = data.roadAddress || data.address || '';
+        const jibunAddress = data.jibunAddress || '';
+        const finalAddress = roadAddress || jibunAddress;
+        const zipcodeEl = document.getElementById('zipcode');
+        const addressEl = document.getElementById('address');
+        const detailEl = document.getElementById('addressDetail');
+        if(zipcodeEl) zipcodeEl.value = data.zonecode || '';
+        if(addressEl) addressEl.value = finalAddress;
+        if(detailEl) detailEl.focus();
+      }
+    }).open();
+  }
+
+  function ensurePostcodeScript(){
+    if(window.daum && window.daum.Postcode){
+      openPostcodeSearch();
+      return;
+    }
+
+    const existing = document.querySelector('script[data-kakao-postcode="true"]');
+    if(existing){
+      existing.addEventListener('load', openPostcodeSearch, { once:true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    script.dataset.kakaoPostcode = 'true';
+    script.onload = openPostcodeSearch;
+    script.onerror = () => {
+      const box = document.getElementById('formError');
+      box.textContent = '주소 검색 스크립트를 불러오지 못했어. 네트워크 상태를 확인해줘.';
+    };
+    document.head.appendChild(script);
+  }
+
+  addressSearchBtn?.addEventListener('click', ensurePostcodeScript);
 
   window.validateOrderForm = function(){
     formError.textContent = '';

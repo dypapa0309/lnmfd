@@ -6,8 +6,6 @@
   const progressPercentEl = document.getElementById('progressPercent');
   const progressFill = document.getElementById('progressFill');
   const countdownEl = document.getElementById('countdown');
-  const toast = document.getElementById('purchaseToast');
-  const toastText = document.getElementById('purchaseToastText');
 
   async function loadFundingStats(){
     try{
@@ -45,23 +43,6 @@
     const hours = Math.floor((diff / (1000*60*60)) % 24);
     const mins = Math.floor((diff / (1000*60)) % 60);
     countdownEl.textContent = `${days}일 ${hours}시간 ${mins}분`;
-  }
-
-  function startFakePurchaseToast(){
-    if(!toast || !toastText) return;
-    const messages = [
-      '서울에서 김OO님이 독서링을 선택했습니다',
-      '부산에서 이OO님이 2EA 세트를 선택했습니다',
-      '인천에서 박OO님이 얼리버드에 참여했습니다',
-      '수원에서 최OO님이 펀딩을 완료했습니다'
-    ];
-    let idx = 0;
-    setInterval(() => {
-      toast.hidden = false;
-      toastText.textContent = messages[idx % messages.length];
-      idx++;
-      setTimeout(() => { toast.hidden = true; }, 3400);
-    }, 12000);
   }
 
   loadFundingStats();
