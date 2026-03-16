@@ -48,5 +48,4 @@
   loadFundingStats();
   updateCountdown();
   setInterval(updateCountdown, 1000);
-  startFakePurchaseToast();
 })();
