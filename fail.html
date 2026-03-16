@@ -9,11 +9,36 @@
 <body>
   <section class="section success-screen">
     <div class="wrap narrow center">
+
       <div class="section-kicker">PAYMENT FAILED</div>
       <h1>결제가 완료되지 않았어</h1>
-      <p class="section-copy center-copy">입력 정보나 결제 수단을 확인한 뒤 다시 시도해줘.</p>
-      <a href="/#order" class="btn btn--solid">주문 화면으로 돌아가기</a>
+
+      <p class="section-copy center-copy">
+        입력 정보나 결제 수단을 확인한 뒤 다시 시도해줘.
+      </p>
+
+      <!-- 실제 토스 에러 표시 -->
+      <div style="margin-top:20px; opacity:0.8;">
+        <p>에러 코드: <strong id="failCode">확인 중...</strong></p>
+        <p id="failMessageDetail">실패 사유 확인 중...</p>
+      </div>
+
+      <a href="/#order" class="btn btn--solid" style="margin-top:30px;">
+        주문 화면으로 돌아가기
+      </a>
+
     </div>
   </section>
+
+<script>
+const params = new URLSearchParams(location.search);
+
+const code = params.get('code') || 'UNKNOWN';
+const message = params.get('message') || '실패 사유를 받지 못했어.';
+
+document.getElementById('failCode').textContent = code;
+document.getElementById('failMessageDetail').textContent = decodeURIComponent(message);
+</script>
+
 </body>
 </html>
