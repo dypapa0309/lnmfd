@@ -29,9 +29,14 @@
           <select id="statusFilter" class="form-input">
             <option value="">전체 상태</option>
             <option value="pending">pending</option>
+            <option value="ready">ready</option>
+            <option value="in_progress">in_progress</option>
             <option value="paid">paid</option>
             <option value="failed">failed</option>
+            <option value="expired">expired</option>
             <option value="cancelled">cancelled</option>
+            <option value="partially_cancelled">partially_cancelled</option>
+            <option value="amount_mismatch">amount_mismatch</option>
           </select>
         </div>
         <div class="admin-actions">
@@ -52,11 +57,13 @@
               <th>수량</th>
               <th>총액</th>
               <th>상태</th>
+              <th>결제수단</th>
               <th>생성일</th>
+              <th>관리</th>
             </tr>
           </thead>
           <tbody id="ordersTableBody">
-            <tr><td colspan="8">주문 데이터 없음</td></tr>
+            <tr><td colspan="10">주문 데이터 없음</td></tr>
           </tbody>
         </table>
       </div>
@@ -65,6 +72,15 @@
 
   <script>
     let loadedRows = [];
+
+    function escapeHtml(value){
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
 
     async function loadAdminStats(){
       try{
@@ -81,19 +97,23 @@
     function renderRows(rows){
       const tbody = document.getElementById('ordersTableBody');
       if(!rows.length){
-        tbody.innerHTML = '<tr><td colspan="8">조건에 맞는 주문이 없음</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10">조건에 맞는 주문이 없음</td></tr>';
         return;
       }
       tbody.innerHTML = rows.map(row => `
         <tr>
-          <td>${row.order_id || ''}</td>
-          <td>${row.name || ''}</td>
-          <td>${row.phone || ''}</td>
-          <td>${row.reward_name || ''}</td>
-          <td>${row.reward_qty || ''}</td>
+          <td>${escapeHtml(row.order_id || '')}</td>
+          <td>${escapeHtml(row.name || '')}</td>
+          <td>${escapeHtml(row.phone || '')}</td>
+          <td>${escapeHtml(row.reward_name || '')}</td>
+          <td>${escapeHtml(row.reward_qty || '')}</td>
           <td>${row.total_amount ? Number(row.total_amount).toLocaleString('ko-KR') + '원' : ''}</td>
-          <td>${row.payment_status || ''}</td>
+          <td>${escapeHtml(row.payment_status || '')}</td>
+          <td>${escapeHtml(row.payment_method || '')}</td>
           <td>${row.created_at ? String(row.created_at).slice(0,19).replace('T',' ') : ''}</td>
+          <td>
+            ${row.payment_status === 'paid' ? `<button class="btn btn--ghost btn--sm" type="button" data-refund-order-id="${escapeHtml(row.order_id || '')}">환불</button>` : ''}
+          </td>
         </tr>
       `).join('');
     }
@@ -118,7 +138,7 @@
 
     function downloadCsv(){
       if(!loadedRows.length) return;
-      const headers = ['order_id','name','phone','reward_name','reward_qty','total_amount','payment_status','created_at'];
+      const headers = ['order_id','name','phone','reward_name','reward_qty','total_amount','payment_status','payment_method','created_at','paid_at','refunded_at','cancellation_reason'];
       const csv = [
         headers.join(','),
         ...loadedRows.map(row => headers.map(h => `"${String(row[h] ?? '').replaceAll('"','""')}"`).join(','))
@@ -149,10 +169,41 @@
           return;
         }
         loadedRows = Array.isArray(data.orders) ? data.orders : [];
-        renderRows(loadedRows);
-        msg.textContent = loadedRows.length + '건 불러왔습니다.';
+        applyFilters();
+        const counts = loadedRows.reduce((acc, row) => {
+          const key = String(row.payment_status || 'unknown');
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+        msg.textContent = `${loadedRows.length}건 불러왔습니다. paid ${counts.paid || 0}건 / pending ${counts.pending || 0}건 / cancelled ${counts.cancelled || 0}건`;
       }catch(e){
         msg.textContent = '불러오기 실패';
+      }
+    }
+
+    async function refundOrder(orderId){
+      const msg = document.getElementById('adminMessage');
+      const password = document.getElementById('adminPassword').value.trim();
+      const reason = window.prompt('환불 사유를 입력해줘.', '고객 요청 취소');
+      if(reason === null) return;
+
+      msg.textContent = `${orderId} 환불 처리 중...`;
+      try{
+        const res = await fetch('/.netlify/functions/cancel-payment', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ password, orderId, cancelReason: reason })
+        });
+        const data = await res.json();
+        if(!res.ok){
+          msg.textContent = data.message || '환불 실패';
+          return;
+        }
+        msg.textContent = `${orderId} 환불 완료`;
+        await loadOrders();
+        await loadAdminStats();
+      }catch(e){
+        msg.textContent = '환불 실패';
       }
     }
 
@@ -160,6 +211,11 @@
     document.getElementById('orderSearch').addEventListener('input', applyFilters);
     document.getElementById('statusFilter').addEventListener('change', applyFilters);
     document.getElementById('downloadCsvBtn').addEventListener('click', downloadCsv);
+    document.getElementById('ordersTableBody').addEventListener('click', (e) => {
+      const refundBtn = e.target.closest('[data-refund-order-id]');
+      if(!refundBtn) return;
+      refundOrder(refundBtn.getAttribute('data-refund-order-id'));
+    });
 
     loadAdminStats();
   </script>

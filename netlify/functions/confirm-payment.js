@@ -1,4 +1,11 @@
-const { createClient } = require('@supabase/supabase-js');
+const {
+  confirmTossPayment,
+  fetchOrderById,
+  fetchTossPayment,
+  getSupabaseAdmin,
+  mapTossStatus,
+  updateOrder
+} = require('./_payment-utils');
 
 exports.handler = async (event) => {
   try{
@@ -9,46 +16,76 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || '{}');
     const { orderId, paymentKey, amount } = body;
     const tossSecretKey = process.env.TOSS_SECRET_KEY || '';
+    const supabase = getSupabaseAdmin();
 
     if(!orderId || !paymentKey || !amount){
       return { statusCode:400, body: JSON.stringify({ message:'orderId, paymentKey, amount가 필요해.' }) };
     }
 
-    let paymentData = null;
-    if(tossSecretKey){
-      const auth = Buffer.from(`${tossSecretKey}:`).toString('base64');
-      const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
-        method:'POST',
-        headers:{
-          'Authorization': `Basic ${auth}`,
-          'Content-Type':'application/json'
-        },
-        body: JSON.stringify({ paymentKey, orderId, amount:Number(amount) })
+    if(!tossSecretKey){
+      return { statusCode:500, body: JSON.stringify({ message:'TOSS_SECRET_KEY가 설정되지 않았어.' }) };
+    }
+
+    if(!supabase){
+      return { statusCode:500, body: JSON.stringify({ message:'Supabase 연결 정보가 필요해.' }) };
+    }
+
+    const order = await fetchOrderById(supabase, orderId);
+    if(!order){
+      return { statusCode:404, body: JSON.stringify({ message:'주문을 찾지 못했어.' }) };
+    }
+
+    const requestAmount = Number(amount);
+    const expectedAmount = Number(order.total_amount || 0);
+    if(expectedAmount !== requestAmount){
+      await updateOrder(supabase, orderId, {
+        payment_status: 'amount_mismatch',
+        payment_error_message: `expected:${expectedAmount}, actual:${requestAmount}`,
+        updated_at: new Date().toISOString()
       });
-      paymentData = await tossRes.json();
-      if(!tossRes.ok){
-        return { statusCode:tossRes.status, body: JSON.stringify({ message: paymentData.message || '토스 결제 승인 실패' }) };
-      }
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: '주문 금액이 일치하지 않아 결제를 승인하지 않았어.' })
+      };
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if(supabaseUrl && supabaseKey){
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          payment_status:'paid',
-          toss_payment_key: paymentKey,
-          total_amount: Number(amount),
-          paid_at: new Date().toISOString()
-        })
-        .eq('order_id', orderId);
-      if(error){
-        return { statusCode:500, body: JSON.stringify({ message:error.message }) };
-      }
+    if(order.payment_status === 'paid'){
+      const paymentData = await fetchTossPayment(tossSecretKey, paymentKey);
+      return {
+        statusCode:200,
+        body: JSON.stringify({ status:'confirmed', payment: paymentData, alreadyConfirmed:true })
+      };
     }
+
+    const paymentData = await confirmTossPayment(tossSecretKey, {
+      paymentKey,
+      orderId,
+      amount: requestAmount
+    });
+
+    if(String(paymentData.orderId || '') !== orderId){
+      return { statusCode:400, body: JSON.stringify({ message:'토스 응답의 주문번호가 일치하지 않아.' }) };
+    }
+
+    if(Number(paymentData.totalAmount || 0) !== expectedAmount){
+      await updateOrder(supabase, orderId, {
+        payment_status: 'amount_mismatch',
+        payment_error_message: `confirmed:${Number(paymentData.totalAmount || 0)}, expected:${expectedAmount}`,
+        updated_at: new Date().toISOString()
+      });
+      return { statusCode:400, body: JSON.stringify({ message:'승인 금액이 주문 금액과 달라.' }) };
+    }
+
+    await updateOrder(supabase, orderId, {
+      payment_status: mapTossStatus(paymentData.status),
+      toss_payment_key: paymentKey,
+      toss_order_status: paymentData.status || '',
+      payment_method: paymentData.method || '',
+      approved_at: paymentData.approvedAt || null,
+      paid_at: paymentData.approvedAt || new Date().toISOString(),
+      payment_last_synced_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
 
     return {
       statusCode:200,

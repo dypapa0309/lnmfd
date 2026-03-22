@@ -195,52 +195,24 @@ button{font:inherit}
 }
 
 
-.detail-preview-card{
-  margin-top:24px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:28px;
-  padding:20px;
-  box-shadow:var(--shadow);
+.detail-page-section{
+  padding:0 0 110px;
+  background:#fff;
 }
-.detail-preview-btn{
-  position:relative;
+.detail-page-inline-image{
+  display:block;
   width:100%;
-  border:0;
-  background:#0f141b;
-  border-radius:20px;
-  overflow:hidden;
-  cursor:pointer;
-}
-.detail-preview-img{
-  width:100%;
+  max-width:860px;
   height:auto;
-}
-.detail-preview-overlay{
-  position:absolute;
-  left:16px;
-  bottom:16px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-height:42px;
-  padding:0 16px;
-  border-radius:999px;
-  background:rgba(11,12,16,.8);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.14);
-  backdrop-filter:blur(10px);
-  font-weight:700;
-}
-.detail-preview-note{
-  margin-top:12px;
-  color:var(--muted);
-  font-size:14px;
+  margin:0 auto;
+  background:#fff;
 }
 .image-modal{
   position:fixed;
   inset:0;
   z-index:9999;
+  display:grid;
+  place-items:center;
 }
 .image-modal[hidden]{display:none}
 .image-modal__backdrop{
@@ -257,7 +229,6 @@ button{font:inherit}
   z-index:2;
   width:min(920px,94vw);
   height:90vh;
-  margin:5vh auto;
   background:#0b1220;
   border:1px solid rgba(255,255,255,.08);
   border-radius:20px;
@@ -299,6 +270,7 @@ button{font:inherit}
   display:flex;
   justify-content:center;
   align-items:flex-start;
+  min-height:240px;
 }
 .image-modal__img{
   display:block;
@@ -308,9 +280,9 @@ button{font:inherit}
   background:#fff;
   border-radius:12px;
   box-shadow:0 16px 40px rgba(0,0,0,.18);
+  opacity:1;
+  transition:opacity .18s ease;
 }
-<<<<<<< HEAD
-
 .image-modal__body{
   position:relative;
   background:#f7f7f3;
@@ -331,17 +303,11 @@ button{font:inherit}
 .image-modal__error{
   background:#5b1f1f;
 }
-.image-modal__img{
-  opacity:0;
-  transition:opacity .18s ease;
-}
 .image-modal__img.is-ready{
   opacity:1;
 }
-=======
->>>>>>> a36f479 (dd)
 @media (max-width:640px){
-  .detail-preview-overlay{left:12px; right:12px; bottom:12px}
-  .image-modal__dialog{width:min(100vw - 12px, 94vw); height:94vh; margin:3vh auto}
+  .image-modal__dialog{width:min(100vw - 12px, 94vw); height:94vh}
   .image-modal__body{height:calc(94vh - 60px); padding:10px}
+  .detail-page-section{padding:0 0 84px}
 }
